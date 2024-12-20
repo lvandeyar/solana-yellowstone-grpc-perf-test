@@ -668,6 +668,7 @@ func main() {
 			case <-ticker.C:
 				continue
 			case <-testEnd:
+				metrics := txTracker.GetMetrics()
 				p1 := cfg.Endpoints[0].Stats
 				qn := cfg.Endpoints[1].Stats
 
@@ -689,11 +690,19 @@ func main() {
 				fmt.Printf("%-20s │ %-15d │ %-15d │ %+15d\n",
 					"Total Transactions", p1Tx, qnTx, p1Tx-qnTx)
 
+				// Unique Transactions
+				fmt.Printf("%-20s │ %-15d │ %-15d │ %+15d\n",
+					"Unique", p1.uniqueCount.Load(), qn.uniqueCount.Load(),
+					p1.uniqueCount.Load()-qn.uniqueCount.Load())
+
+				// Matched Transactions
+				fmt.Printf("%-20s │ %-15d │ %-15d │ %+15d\n",
+					"Matched", p1.matchCount.Load(), qn.matchCount.Load(),
+					p1.matchCount.Load()-qn.matchCount.Load())
+
 				// Average Latency
-				p1AvgLatency := p1.GetMetrics()["avg_latency"]
-				qnAvgLatency := qn.GetMetrics()["avg_latency"]
-				fmt.Printf("%-20s │ %-15v │ %-15v │ %-15s\n",
-					"Avg Latency", p1AvgLatency, qnAvgLatency, "-")
+				fmt.Printf("%-20s │ %-15v │ %-15s │ %-15s\n",
+					"Avg Latency", metrics["average_latency"], "-", "-")
 
 				// Drop Rate/s
 				fmt.Printf("%-20s │ %-15.2f │ %-15.2f │ %+15.2f\n",
